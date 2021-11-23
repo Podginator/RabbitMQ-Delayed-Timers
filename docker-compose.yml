@@ -1,0 +1,63 @@
+version: "3.8"
+services:
+  rabbitmq:
+    image: timers-rabbitmq
+    container_name: 'rabbitmq'
+    environment:
+      RABBITMQ_DEFAULT_USER: tom
+      RABBITMQ_DEFAULT_PASS: timers
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - timers_net
+  timers_backend:
+    image: timers-backend
+    container_name: 'timers-backend'
+    environment:
+      RABBIT_MQ_URL: amqp://tom:timers@rabbitmq:5672/
+      QUEUE_NAME: timersDelayedQueue
+      AWS_REGION: eu-west-1
+      AWS_ACCESS_KEY_ID: FAKE-LOCALSTACK
+      AWS_SECRET_ACCESS_KEY: FAKE-LOCALSTACK
+      DYNAMODB_ENDPOINT: http://localstack:4566
+      TIMER_TABLE: timers
+    ports:
+      - 8000:8000
+    networks:
+      - timers_net
+  timers_callback:
+    image: timers-callback
+    container_name: 'timers-callback'
+    ports:
+      - 8001:8001
+    networks:
+      - timers_net
+  timers_consumer:
+    image: timers-consumer
+    container_name: 'timers-consumer'
+    environment:
+      RABBIT_MQ_URL: amqp://tom:timers@rabbitmq:5672
+      CONSUMER_QUEUE_NAME: timersPublishQueue
+    networks:
+      - timers_net
+  localstack:
+    image: localstack/localstack:latest
+    container_name: 'localstack'
+    environment:
+      - AWS_DEFAULT_REGION=eu-west-1
+      - EDGE_PORT=4566
+      - SERVICES=dynamodb
+    ports:
+      - '4566:4566'
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - timers_net
+networks:
+  timers_net:
+    driver: bridge

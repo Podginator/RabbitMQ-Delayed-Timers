@@ -1,0 +1,19 @@
+{
+  "name": "timers-timer",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Tom Rogers",
+  "private": true,
+  "license": "UNLICENSED",
+  "files": [
+    "index.js",
+    "package.json"
+  ],
+  "scripts": {
+  },
+  "dependencies": {
+    "fastify": "^3.24.0"
+  },
+  "devDependencies": {
+  }
+}

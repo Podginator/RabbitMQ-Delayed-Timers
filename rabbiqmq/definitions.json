@@ -1,0 +1,88 @@
+{
+  "rabbit_version": "3.9.9",
+  "rabbitmq_version": "3.9.9",
+  "product_name": "RabbitMQ",
+  "product_version": "3.9.9",
+  "users": [
+    {
+      "name": "tom",
+      "password_hash": "xLddgeDUu74hRKSpi4AJfySHSK0z2H2GjwvGqD+DjiQgSDQD",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "tom",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-HsiaHDVbXs1QGlSHGf3nag"
+    }
+  ],
+  "policies": [],
+  "queues": [
+    {
+      "name": "timersPublishQueue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "timersDelayedQueue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "timers.exchange",
+        "x-dead-letter-routing-key": "timers.publish"
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "timers.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "timers.exchange",
+      "vhost": "/",
+      "destination": "timersDelayedQueue",
+      "destination_type": "queue",
+      "routing_key": "timers.delay",
+      "arguments": {}
+    },
+    {
+      "source": "timers.exchange",
+      "vhost": "/",
+      "destination": "timersPublishQueue",
+      "destination_type": "queue",
+      "routing_key": "timers.publish",
+      "arguments": {}
+    }
+  ]
+}
